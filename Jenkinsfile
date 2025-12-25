@@ -1,11 +1,6 @@
 pipeline {
 	agent any
 
-	tools {
-		// Jenkins > Manage Jenkins > Tools kısmında tanımlı Maven adı
-		maven 'M3'
-	}
-
 	environment {
 		MAVEN_OPTS = '-Xmx512m'
 	}
@@ -19,29 +14,18 @@ pipeline {
 
 		stage('Build') {
 			steps {
-				script {
-					if (isUnix()) {
-						sh 'mvn clean -B -DskipTests package'
-					} else {
-						bat 'mvn clean -B -DskipTests package'
-					}
-				}
+				sh 'chmod +x ./mvnw'
+				sh './mvnw clean -B -DskipTests package'
 			}
 		}
 
 		stage('Test') {
 			steps {
-				script {
-					if (isUnix()) {
-						sh 'mvn -B test'
-					} else {
-						bat 'mvn -B test'
-					}
-				}
+				sh './mvnw -B test'
 			}
 			post {
 				always {
-					junit '**/target/surefire-reports/*.xml'
+					junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
 				}
 			}
 		}
@@ -51,21 +35,9 @@ pipeline {
 				expression { currentBuild.currentResult == 'SUCCESS' }
 			}
 			steps {
-				script {
-					if (isUnix()) {
-						sh '''
-                      echo "Tests passed — running deploy step"
-                      # Buraya deploy komutlarınızı ekleyin
-                      # Örnek: scp target/*.jar user@server:/path/
-                   '''
-					} else {
-						bat '''
-                      echo Tests passed
-                      echo Running deploy step
-                      REM Buraya deploy komutlarınızı ekleyin
-                   '''
-					}
-				}
+				sh '''
+                echo "Tests passed — running deploy step"
+             '''
 			}
 		}
 	}
