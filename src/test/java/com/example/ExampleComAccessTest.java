@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("resource")
 public class ExampleComAccessTest {
-
+//test
     @Test
     public void exampleDotComIsReachable() throws IOException, InterruptedException {
         HttpClient client = HttpClient.newBuilder()
