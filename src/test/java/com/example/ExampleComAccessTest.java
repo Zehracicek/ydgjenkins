@@ -29,7 +29,8 @@ public class ExampleComAccessTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(200, response.statusCode(), "Expected HTTP 200 from https://example.com");
+        // BOZULDU: 404 bekliyor ama 200 gelecek
+        assertEquals(404, response.statusCode(), "Expected HTTP 404 from https://example.com");
         assertTrue(response.body().contains("Example Domain"), "Response body should contain 'Example Domain'");
     }
 }
