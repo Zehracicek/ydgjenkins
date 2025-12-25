@@ -11,13 +11,19 @@ pipeline {
 	}
 
 	stages {
+		stage('Checkout SCM') {
+			steps {
+				checkout scm
+			}
+		}
+
 		stage('Build') {
 			steps {
 				script {
 					if (isUnix()) {
-						sh 'mvn -B -DskipTests package'
+						sh 'mvn clean -B -DskipTests package'
 					} else {
-						bat 'mvn -B -DskipTests package'
+						bat 'mvn clean -B -DskipTests package'
 					}
 				}
 			}
@@ -33,18 +39,31 @@ pipeline {
 					}
 				}
 			}
+			post {
+				always {
+					junit '**/target/surefire-reports/*.xml'
+				}
+			}
 		}
 
 		stage('Deploy') {
 			when {
-				expression { currentBuild.currentResult == null || currentBuild.currentResult == 'SUCCESS' }
+				expression { currentBuild.currentResult == 'SUCCESS' }
 			}
 			steps {
 				script {
 					if (isUnix()) {
-						sh 'echo "Tests passed — running deploy step"'
+						sh '''
+                      echo "Tests passed — running deploy step"
+                      # Buraya deploy komutlarınızı ekleyin
+                      # Örnek: scp target/*.jar user@server:/path/
+                   '''
 					} else {
-						bat 'echo Tests passed ^& echo Running deploy step'
+						bat '''
+                      echo Tests passed
+                      echo Running deploy step
+                      REM Buraya deploy komutlarınızı ekleyin
+                   '''
 					}
 				}
 			}
@@ -59,8 +78,7 @@ pipeline {
 			echo 'Pipeline failed (build or tests failed).'
 		}
 		always {
-			junit '**/target/surefire-reports/*.xml'
-			archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+			archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true, fingerprint: true
 		}
 	}
 }
